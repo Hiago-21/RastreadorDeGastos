@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="description" content="Controle financeiro pessoal simples e elegante.">
+  <title>Saldo | Controle financeiro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="script.js" defer></script>
+</head>
+<body class="app-body">
+  <main class="login-screen" id="loginScreen">
+    <div class="login-mark" aria-hidden="true">F</div>
+    <div class="login-copy">
+      <p class="eyebrow">FINTRACKER</p>
+      <h1>Seu dinheiro,<br>mais claro.</h1>
+      <p>Entre com seu e-mail para acessar seu painel financeiro.</p>
+    </div>
+    <form class="login-form" id="loginForm">
+      <label class="form-field" for="loginEmail">
+        <span>Seu e-mail</span>
+        <input id="loginEmail" name="email" type="email" autocomplete="email" inputmode="email" placeholder="voce@exemplo.com" required>
+      </label>
+      <button class="primary-button" type="submit">Receber Magic Link <span>→</span></button>
+      <p class="form-feedback" id="loginFeedback" role="status" aria-live="polite"></p>
+    </form>
+    <p class="login-note">Acesso seguro, sem senha.</p>
+  </main>
+
+  <main class="app-shell" id="monthSurface" hidden>
+    <header class="topbar">
+      <div>
+        <p class="eyebrow">VISÃO GERAL</p>
+        <h1 id="monthTitle">Setembro <span id="monthYear">2026</span></h1>
+      </div>
+      <div class="header-actions">
+        <button class="icon-button theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema">◐</button>
+        <button class="logout-button" id="logoutButton" type="button">Sair</button>
+        <div class="month-actions" aria-label="Navegação de mês">
+          <button class="icon-button" id="previousMonth" type="button" aria-label="Mês anterior">‹</button>
+          <button class="icon-button" id="nextMonth" type="button" aria-label="Próximo mês">›</button>
+        </div>
+      </div>
+    </header>
+
+    <div class="dashboard-grid">
+      <div class="dashboard-main">
+    <section class="balance-card" aria-labelledby="balanceLabel">
+      <div class="balance-heading">
+        <span id="balanceLabel">Saldo livre</span>
+        <span class="balance-status" id="balanceStatus">Em dia</span>
+      </div>
+      <strong class="balance-value" id="balanceValue">R$ 0,00</strong>
+      <div class="balance-meta">
+        <span>Renda mensal</span>
+        <label class="income-field" for="incomeInput">
+          <span>R$</span>
+          <input id="incomeInput" inputmode="numeric" aria-label="Renda mensal" placeholder="0,00">
+        </label>
+      </div>
+      <div class="progress-track" aria-hidden="true"><span id="budgetProgress"></span></div>
+      <div class="progress-labels"><span id="spentLabel">R$ 0,00 gastos</span><span id="budgetLabel">0% usado</span></div>
+    </section>
+
+    <section class="quick-stats" aria-label="Resumo do mês">
+      <article class="stat-card"><span>Gastos</span><strong id="totalSpent">R$ 0,00</strong><small id="expenseCount">0 lançamentos</small></article>
+      <article class="stat-card"><span>Maior categoria</span><strong id="topCategory">--</strong><small id="topCategoryAmount">Sem gastos ainda</small></article>
+    </section>
+      </div>
+      <div class="dashboard-aside">
+
+    <section class="charts-section" aria-label="Análise de gastos">
+      <div class="section-heading"><div><p class="eyebrow">ANÁLISE</p><h2>Para onde vai seu dinheiro</h2></div></div>
+      <div class="charts-grid">
+        <article class="chart-card donut-card"><div class="chart-wrap"><canvas id="categoryChart" aria-label="Gastos por categoria"></canvas><div class="chart-center"><strong id="chartTotal">R$ 0</strong><span>no mês</span></div></div><div class="legend" id="categoryLegend"></div></article>
+        <article class="chart-card bar-card"><div class="chart-card-heading"><span>Ritmo diário</span><span id="averageDaily">R$ 0/dia</span></div><div class="bar-chart-wrap"><canvas id="dailyChart" aria-label="Gastos diários"></canvas></div></article>
+      </div>
+    </section>
+
+    <section class="history-section" aria-labelledby="historyTitle">
+      <div class="section-heading"><div><p class="eyebrow">MOVIMENTAÇÕES</p><h2 id="historyTitle">Histórico</h2></div><span class="count-badge" id="visibleCount">0</span></div>
+      <label class="search-pill" for="searchInput"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="Buscar gastos" autocomplete="off"></label>
+      <div class="expense-list" id="expenseList"><div class="empty-state"><span class="empty-icon">＋</span><strong>Nenhum gasto por aqui</strong><p>Adicione seu primeiro lançamento para começar.</p></div></div>
+    </section>
+      </div>
+    </div>
+  </main>
+
+  <button class="fab" id="openSheet" type="button" aria-label="Adicionar gasto">+</button>
+  <div class="scrim" id="scrim" hidden></div>
+  <section class="bottom-sheet" id="expenseSheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+    <div class="sheet-handle"></div>
+    <div class="sheet-heading"><div><p class="eyebrow">NOVO LANÇAMENTO</p><h2 id="sheetTitle">Adicionar gasto</h2></div><button class="close-button" id="closeSheet" type="button" aria-label="Fechar">×</button></div>
+    <form id="expenseForm">
+      <label class="form-field"><span>Descrição</span><input id="descriptionInput" required maxlength="60" placeholder="Ex.: Mercado, academia..."></label>
+      <div class="form-row">
+        <label class="form-field"><span>Valor</span><div class="currency-input"><span>R$</span><input id="amountInput" required inputmode="numeric" placeholder="0,00"></div></label>
+        <label class="form-field"><span>Data</span><input id="dateInput" type="date" required></label>
+      </div>
+      <label class="form-field"><span>Categoria</span><select id="categorySelect"></select></label>
+      <div class="custom-category" id="customCategoryBox" hidden><label class="form-field"><span>Nome da nova categoria</span><input id="customCategoryInput" maxlength="24" placeholder="Ex.: Pets"></label></div>
+      <fieldset class="advanced-fieldset"><legend>Opções avançadas</legend><div class="type-pills" role="radiogroup" aria-label="Tipo de gasto"><label><input type="radio" name="expenseType" value="single" checked><span>Único</span></label><label><input type="radio" name="expenseType" value="fixed"><span>Fixo / mensal</span></label><label><input type="radio" name="expenseType" value="installment"><span>Parcelado</span></label></div><label class="form-field installment-field" id="installmentBox" hidden><span>Quantidade de parcelas</span><input id="installmentInput" type="number" min="2" max="60" value="2"></label></fieldset>
+      <p class="form-feedback" id="formFeedback" role="alert"></p>
+      <button class="primary-button" type="submit">Adicionar gasto <span>→</span></button>
+    </form>
+  </section>
+</body>
+</html>
