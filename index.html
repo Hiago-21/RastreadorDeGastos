@@ -63,9 +63,35 @@
                             <option value="Bebida">Bebida</option>
                             <option value="Contas">Contas Fixas</option>
                             <option value="Outros">Outros</option>
+                            <option value="__new__">+ Criar nova...</option>
                         </select>
+                        <div id="custom-category-editor" class="custom-category-editor" hidden>
+                            <input type="text" id="custom-category-input" placeholder="Nova categoria" maxlength="30">
+                            <button type="button" id="confirm-category" class="btn-icon" aria-label="Confirmar nova categoria">&#10003;</button>
+                        </div>
                     </div>
                     <input type="text" id="expense-desc" placeholder="Descrição rápida (ex: Remédio, Almoço)" required>
+                    <button type="button" id="advanced-options" class="btn-text advanced-toggle" aria-expanded="false">Opções Avançadas</button>
+                    <div id="advanced-options-panel" class="advanced-options" hidden>
+                        <div class="expense-types" role="radiogroup" aria-label="Tipo de gasto">
+                            <label class="expense-type-pill">
+                                <input type="radio" name="expense-type" value="single" checked>
+                                <span>Único</span>
+                            </label>
+                            <label class="expense-type-pill">
+                                <input type="radio" name="expense-type" value="fixed">
+                                <span>Fixo/Mensal</span>
+                            </label>
+                            <label class="expense-type-pill">
+                                <input type="radio" name="expense-type" value="installment">
+                                <span>Parcelado</span>
+                            </label>
+                        </div>
+                        <label id="installments-field" class="installments-field" hidden>
+                            <span>Qtd. de Parcelas</span>
+                            <input type="number" id="installments-input" min="2" max="120" step="1" value="2" inputmode="numeric">
+                        </label>
+                    </div>
                     <button type="submit" class="btn-primary">Registrar</button>
                 </form>
             </section>

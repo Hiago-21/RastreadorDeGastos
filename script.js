@@ -1,5 +1,6 @@
 // --- Estado da Aplicação ---
 let appData = JSON.parse(localStorage.getItem('finTrackerData')) || {};
+let customCategories = JSON.parse(localStorage.getItem('finTrackerCategories')) || [];
 let currentMonthKey = '';
 let chartInstance = null;
 
@@ -20,6 +21,7 @@ function initApp() {
     }
     
     currentMonthKey = thisMonth;
+    loadCustomCategories();
     updateMonthLabel();
     setupEventListeners();
     updateUI();
@@ -41,10 +43,18 @@ function parseCurrency(str) {
 function setupEventListeners() {
     const incomeInput = document.getElementById('income-input');
     const expenseAmountInput = document.getElementById('expense-amount');
+    const categorySelect = document.getElementById('expense-category');
+    const customCategoryEditor = document.getElementById('custom-category-editor');
+    const customCategoryInput = document.getElementById('custom-category-input');
     const form = document.getElementById('expense-form');
     const previousMonth = document.getElementById('previous-month');
     const nextMonth = document.getElementById('next-month');
     const btnExport = document.getElementById('btn-export');
+    const advancedOptionsButton = document.getElementById('advanced-options');
+    const advancedOptionsPanel = document.getElementById('advanced-options-panel');
+    const installmentsField = document.getElementById('installments-field');
+    const installmentsInput = document.getElementById('installments-input');
+    const confirmCategoryButton = document.getElementById('confirm-category');
     const monthNavigation = document.querySelector('.header-top');
     let touchStartX = 0;
 
@@ -61,17 +71,65 @@ function setupEventListeners() {
         e.target.value = formatCurrencyBRL(e.target.value);
     });
 
+    categorySelect.addEventListener('change', () => {
+        const isCreatingCategory = categorySelect.value === '__new__';
+        categorySelect.hidden = isCreatingCategory;
+        customCategoryEditor.hidden = !isCreatingCategory;
+        if (isCreatingCategory) customCategoryInput.focus();
+    });
+
+    confirmCategoryButton.addEventListener('click', () => {
+        const category = customCategoryInput.value.trim();
+        if (!category) {
+            customCategoryInput.focus();
+            return;
+        }
+
+        if (!customCategories.includes(category)) {
+            customCategories.push(category);
+            localStorage.setItem('finTrackerCategories', JSON.stringify(customCategories));
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            categorySelect.insertBefore(option, categorySelect.querySelector('option[value="__new__"]'));
+        }
+
+        categorySelect.value = category;
+        categorySelect.hidden = false;
+        customCategoryEditor.hidden = true;
+        customCategoryInput.value = '';
+    });
+
+    advancedOptionsButton.addEventListener('click', () => {
+        const isOpen = advancedOptionsPanel.hidden;
+        advancedOptionsPanel.hidden = !isOpen;
+        advancedOptionsButton.setAttribute('aria-expanded', String(isOpen));
+    });
+
+    document.querySelectorAll('input[name="expense-type"]').forEach(input => {
+        input.addEventListener('change', () => {
+            installmentsField.hidden = input.value !== 'installment' || !input.checked;
+        });
+    });
+
     // Submeter Gasto
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         const amount = parseCurrency(expenseAmountInput.value);
-        const category = document.getElementById('expense-category').value;
+        const category = categorySelect.value;
         const desc = document.getElementById('expense-desc').value;
+        const expenseType = document.querySelector('input[name="expense-type"]:checked').value;
+        const installments = Number.parseInt(installmentsInput.value, 10);
 
-        if (amount > 0 && category && desc) {
-            appData[currentMonthKey].expenses.push({ id: Date.now(), amount, category, desc });
+        if (amount > 0 && category && category !== '__new__' && desc && (expenseType !== 'installment' || installments >= 2)) {
+            addProjectedExpenses({ amount, category, desc, expenseType, installments });
             saveData();
             form.reset();
+            categorySelect.hidden = false;
+            customCategoryEditor.hidden = true;
+            advancedOptionsPanel.hidden = true;
+            advancedOptionsButton.setAttribute('aria-expanded', 'false');
+            installmentsField.hidden = true;
             updateUI();
         }
     });
@@ -245,16 +303,56 @@ function registerServiceWorker() {
 }
 
 function changeMonth(offset) {
-    const [year, month] = currentMonthKey.split('-').map(Number);
-    const nextDate = new Date(year, month - 1 + offset, 1);
-    const nextMonthKey = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}`;
-
-    if (!appData[nextMonthKey]) {
-        appData[nextMonthKey] = { income: 0, expenses: [] };
-        saveData();
-    }
-
+    const nextMonthKey = getMonthKey(currentMonthKey, offset);
+    ensureMonth(nextMonthKey);
     currentMonthKey = nextMonthKey;
     updateMonthLabel();
     updateUI();
+}
+
+function getMonthKey(monthKey, offset) {
+    const [year, month] = monthKey.split('-').map(Number);
+    const date = new Date(year, month - 1 + offset, 1);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+}
+
+function ensureMonth(monthKey) {
+    if (!appData[monthKey]) {
+        appData[monthKey] = { income: 0, expenses: [] };
+    }
+}
+
+function addProjectedExpenses({ amount, category, desc, expenseType, installments }) {
+    const totalEntries = expenseType === 'installment' ? installments : expenseType === 'fixed' ? 12 : 1;
+    const installmentAmount = expenseType === 'installment' ? amount / installments : amount;
+
+    for (let index = 0; index < totalEntries; index += 1) {
+        const monthKey = getMonthKey(currentMonthKey, index);
+        ensureMonth(monthKey);
+
+        const installmentDesc = expenseType === 'installment'
+            ? `${desc} (${index + 1}/${installments})`
+            : desc;
+
+        appData[monthKey].expenses.push({
+            id: Date.now() + index,
+            amount: installmentAmount,
+            category,
+            desc: installmentDesc
+        });
+    }
+}
+
+function loadCustomCategories() {
+    const categorySelect = document.getElementById('expense-category');
+    const newCategoryOption = categorySelect.querySelector('option[value="__new__"]');
+
+    customCategories
+        .filter(category => category && ![...categorySelect.options].some(option => option.value === category))
+        .forEach(category => {
+            const option = document.createElement('option');
+            option.value = category;
+            option.textContent = category;
+            categorySelect.insertBefore(option, newCategoryOption);
+        });
 }
