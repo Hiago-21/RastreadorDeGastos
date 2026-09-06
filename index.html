@@ -17,103 +17,118 @@
 </head>
 <body>
     <div class="app-container">
-        
         <header>
-            <div class="header-top">
+            <div class="header-top app-bar">
+                <span class="brand-mark" aria-hidden="true">◒</span>
+                <span class="brand-name">Fintrack</span>
                 <nav class="month-navigation" aria-label="Navegação entre meses">
                     <button type="button" id="previous-month" aria-label="Mês anterior">&lt;</button>
                     <span id="month-label" aria-live="polite"></span>
                     <button type="button" id="next-month" aria-label="Próximo mês">&gt;</button>
                 </nav>
             </div>
-            
-            <div class="card income-card">
-                <label for="income-input">Minha Renda Mensal</label>
-                <input type="text" id="income-input" placeholder="R$ 0,00" inputmode="numeric">
-            </div>
-
-            <div class="dashboard-summary">
-                <div class="summary-box">
-                    <span>Gastos</span>
-                    <strong id="total-expenses" class="expense-color">R$ 0,00</strong>
+            <section class="balance-card" aria-label="Resumo financeiro">
+                <div class="balance-card-top">
+                    <span>Saldo disponível</span>
+                    <span class="balance-status">● Atualizado</span>
                 </div>
-                <div class="summary-box">
-                    <span>Saldo Livre</span>
-                    <strong id="total-balance">R$ 0,00</strong>
+                <strong id="total-balance" class="balance-value">R$ 0,00</strong>
+                <div class="balance-details">
+                    <div>
+                        <span>Renda mensal</span>
+                        <input type="text" id="income-input" placeholder="R$ 0,00" inputmode="numeric" aria-label="Renda mensal">
+                    </div>
+                    <div>
+                        <span>Gastos</span>
+                        <strong id="total-expenses" class="expense-color">R$ 0,00</strong>
+                    </div>
                 </div>
-            </div>
+            </section>
         </header>
 
         <main>
-            <!-- Sistema de Alertas (IA Baseada em Regras) -->
             <div id="alerts-container"></div>
-
-            <section class="quick-add">
-                <h2>Adicionar Gasto</h2>
-                <form id="expense-form">
-                    <div class="form-row">
-                        <input type="text" id="expense-amount" placeholder="R$ 0,00" inputmode="numeric" required>
-                        <select id="expense-category" required>
-                            <option value="" disabled selected>Categoria...</option>
-                            <option value="Alimentação">Alimentação</option>
-                            <option value="Transporte">Transporte</option>
-                            <option value="Saúde">Saúde</option>
-                            <option value="Lazer">Lazer</option>
-                            <option value="Cigarro">Cigarro</option>
-                            <option value="Bebida">Bebida</option>
-                            <option value="Contas">Contas Fixas</option>
-                            <option value="Outros">Outros</option>
-                            <option value="__new__">+ Criar nova...</option>
-                        </select>
-                        <div id="custom-category-editor" class="custom-category-editor" hidden>
-                            <input type="text" id="custom-category-input" placeholder="Nova categoria" maxlength="30">
-                            <button type="button" id="confirm-category" class="btn-icon" aria-label="Confirmar nova categoria">&#10003;</button>
-                        </div>
-                    </div>
-                    <input type="text" id="expense-desc" placeholder="Descrição rápida (ex: Remédio, Almoço)" required>
-                    <button type="button" id="advanced-options" class="btn-text advanced-toggle" aria-expanded="false">Opções Avançadas</button>
-                    <div id="advanced-options-panel" class="advanced-options" hidden>
-                        <div class="expense-types" role="radiogroup" aria-label="Tipo de gasto">
-                            <label class="expense-type-pill">
-                                <input type="radio" name="expense-type" value="single" checked>
-                                <span>Único</span>
-                            </label>
-                            <label class="expense-type-pill">
-                                <input type="radio" name="expense-type" value="fixed">
-                                <span>Fixo/Mensal</span>
-                            </label>
-                            <label class="expense-type-pill">
-                                <input type="radio" name="expense-type" value="installment">
-                                <span>Parcelado</span>
-                            </label>
-                        </div>
-                        <label id="installments-field" class="installments-field" hidden>
-                            <span>Qtd. de Parcelas</span>
-                            <input type="number" id="installments-input" min="2" max="120" step="1" value="2" inputmode="numeric">
-                        </label>
-                    </div>
-                    <button type="submit" class="btn-primary">Registrar</button>
-                </form>
-            </section>
-
             <section class="charts-section">
-                <h2>Onde seu dinheiro está indo</h2>
+                <div class="section-heading">
+                    <div>
+                        <span class="eyebrow">Visão geral</span>
+                        <h2>Seus gastos</h2>
+                    </div>
+                    <span id="expense-count" class="count-badge">0</span>
+                </div>
                 <div class="chart-container">
                     <canvas id="category-chart"></canvas>
+                    <div id="chart-empty" class="chart-empty" hidden>Adicione um gasto para ver a distribuição.</div>
                 </div>
             </section>
 
             <section class="history-section">
                 <div class="history-header">
-                    <h2>Histórico do Mês</h2>
-                    <button id="btn-export" class="btn-text">Exportar .CSV</button>
+                    <div>
+                        <span class="eyebrow">Movimentações</span>
+                        <h2>Histórico do mês</h2>
+                    </div>
+                    <button id="btn-export" class="btn-text">Exportar</button>
                 </div>
+                <label class="search-field" for="expense-search">
+                    <span aria-hidden="true">⌕</span>
+                    <input type="search" id="expense-search" placeholder="Buscar gastos" autocomplete="off">
+                </label>
                 <ul id="expense-list" class="expense-list">
                     <!-- Gastos injetados via JS -->
                 </ul>
             </section>
         </main>
     </div>
+
+    <button type="button" id="open-expense-sheet" class="fab" aria-label="Adicionar gasto">+</button>
+
+    <div id="sheet-backdrop" class="sheet-backdrop" hidden></div>
+    <section id="expense-sheet" class="bottom-sheet" role="dialog" aria-modal="true" aria-labelledby="sheet-title" hidden>
+        <div class="sheet-handle" aria-hidden="true"></div>
+        <div class="sheet-header">
+            <div>
+                <span class="eyebrow">Nova movimentação</span>
+                <h2 id="sheet-title">Adicionar gasto</h2>
+            </div>
+            <button type="button" id="close-expense-sheet" class="sheet-close" aria-label="Fechar">&times;</button>
+        </div>
+        <form id="expense-form">
+            <div class="form-row">
+                <input type="text" id="expense-amount" placeholder="R$ 0,00" inputmode="numeric" required>
+                <select id="expense-category" required>
+                    <option value="" disabled selected>Categoria...</option>
+                    <option value="Alimentação">Alimentação</option>
+                    <option value="Transporte">Transporte</option>
+                    <option value="Saúde">Saúde</option>
+                    <option value="Lazer">Lazer</option>
+                    <option value="Cigarro">Cigarro</option>
+                    <option value="Bebida">Bebida</option>
+                    <option value="Contas">Contas Fixas</option>
+                    <option value="Outros">Outros</option>
+                    <option value="__new__">+ Criar nova...</option>
+                </select>
+                <div id="custom-category-editor" class="custom-category-editor" hidden>
+                    <input type="text" id="custom-category-input" placeholder="Nova categoria" maxlength="30">
+                    <button type="button" id="confirm-category" class="btn-icon" aria-label="Confirmar nova categoria">&#10003;</button>
+                </div>
+            </div>
+            <input type="text" id="expense-desc" placeholder="Descrição rápida (ex: Remédio, Almoço)" required>
+            <button type="button" id="advanced-options" class="btn-text advanced-toggle" aria-expanded="false">Opções Avançadas</button>
+            <div id="advanced-options-panel" class="advanced-options" hidden>
+                <div class="expense-types" role="radiogroup" aria-label="Tipo de gasto">
+                    <label class="expense-type-pill"><input type="radio" name="expense-type" value="single" checked><span>Único</span></label>
+                    <label class="expense-type-pill"><input type="radio" name="expense-type" value="fixed"><span>Fixo/Mensal</span></label>
+                    <label class="expense-type-pill"><input type="radio" name="expense-type" value="installment"><span>Parcelado</span></label>
+                </div>
+                <label id="installments-field" class="installments-field" hidden>
+                    <span>Qtd. de Parcelas</span>
+                    <input type="number" id="installments-input" min="2" max="120" step="1" value="2" inputmode="numeric">
+                </label>
+            </div>
+            <button type="submit" class="btn-primary">Registrar gasto</button>
+        </form>
+    </section>
 
     <!-- Chart.js CDN -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>

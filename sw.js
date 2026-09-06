@@ -1,4 +1,4 @@
-const CACHE_NAME = 'Rastreador-v2';
+const CACHE_NAME = 'Rastreador-v3';
 const urlsToCache = [
   './',
   './index.html',

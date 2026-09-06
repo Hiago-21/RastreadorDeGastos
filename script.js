@@ -3,6 +3,7 @@ let appData = JSON.parse(localStorage.getItem('finTrackerData')) || {};
 let customCategories = JSON.parse(localStorage.getItem('finTrackerCategories')) || [];
 let currentMonthKey = '';
 let chartInstance = null;
+let expenseSearchTerm = '';
 
 // --- Inicialização ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -50,6 +51,11 @@ function setupEventListeners() {
     const previousMonth = document.getElementById('previous-month');
     const nextMonth = document.getElementById('next-month');
     const btnExport = document.getElementById('btn-export');
+    const expenseSearch = document.getElementById('expense-search');
+    const openExpenseSheet = document.getElementById('open-expense-sheet');
+    const closeExpenseSheet = document.getElementById('close-expense-sheet');
+    const expenseSheet = document.getElementById('expense-sheet');
+    const sheetBackdrop = document.getElementById('sheet-backdrop');
     const advancedOptionsButton = document.getElementById('advanced-options');
     const advancedOptionsPanel = document.getElementById('advanced-options-panel');
     const installmentsField = document.getElementById('installments-field');
@@ -57,6 +63,30 @@ function setupEventListeners() {
     const confirmCategoryButton = document.getElementById('confirm-category');
     const monthNavigation = document.querySelector('.header-top');
     let touchStartX = 0;
+
+    const openSheet = () => {
+        expenseSheet.hidden = false;
+        sheetBackdrop.hidden = false;
+        document.body.classList.add('sheet-open');
+        window.requestAnimationFrame(() => document.getElementById('expense-amount').focus());
+    };
+
+    const closeSheet = () => {
+        expenseSheet.hidden = true;
+        sheetBackdrop.hidden = true;
+        document.body.classList.remove('sheet-open');
+    };
+
+    openExpenseSheet.addEventListener('click', openSheet);
+    closeExpenseSheet.addEventListener('click', closeSheet);
+    sheetBackdrop.addEventListener('click', closeSheet);
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && !expenseSheet.hidden) closeSheet();
+    });
+    expenseSearch.addEventListener('input', (event) => {
+        expenseSearchTerm = event.target.value.trim().toLocaleLowerCase('pt-BR');
+        renderExpenseList(appData[currentMonthKey].expenses);
+    });
 
     // Máscara ao digitar Salário
     incomeInput.addEventListener('input', (e) => {
@@ -130,6 +160,7 @@ function setupEventListeners() {
             advancedOptionsPanel.hidden = true;
             advancedOptionsButton.setAttribute('aria-expanded', 'false');
             installmentsField.hidden = true;
+            closeSheet();
             updateUI();
         }
     });
@@ -168,6 +199,7 @@ function updateUI(updateIncomeInput = true) {
 
     document.getElementById('total-expenses').innerText = totalExpenses.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     document.getElementById('total-balance').innerText = balance.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    document.getElementById('expense-count').textContent = data.expenses.length;
     
     // Cor do saldo
     document.getElementById('total-balance').style.color = balance < 0 ? 'var(--danger)' : 'var(--success)';
@@ -208,14 +240,17 @@ function processAITips(income, expenses, balance) {
 // --- Gráfico e Renderizações ---
 function renderChart(expenses) {
     const ctx = document.getElementById('category-chart').getContext('2d');
+    const chartEmpty = document.getElementById('chart-empty');
     
     if (chartInstance) chartInstance.destroy();
 
     if (expenses.length === 0) {
         document.getElementById('category-chart').style.display = 'none';
+        chartEmpty.hidden = false;
         return;
     }
     document.getElementById('category-chart').style.display = 'block';
+    chartEmpty.hidden = true;
 
     const categories = {};
     expenses.forEach(e => { categories[e.category] = (categories[e.category] || 0) + e.amount; });
@@ -233,7 +268,7 @@ function renderChart(expenses) {
         options: {
             responsive: true,
             maintainAspectRatio: false,
-            plugins: { legend: { position: 'right', labels: { font: { family: 'Inter' } } } },
+            plugins: { legend: { position: 'right', labels: { color: getComputedStyle(document.body).getPropertyValue('--text-muted'), font: { family: 'Inter' } } } },
             cutout: '70%'
         }
     });
@@ -242,21 +277,90 @@ function renderChart(expenses) {
 function renderExpenseList(expenses) {
     const list = document.getElementById('expense-list');
     list.innerHTML = '';
-    
-    // Inverter para mostrar os mais recentes primeiro
-    [...expenses].reverse().forEach(exp => {
-        list.innerHTML += `
-            <li class="expense-item">
-                <div class="expense-info">
-                    <strong>${exp.desc}</strong>
-                    <span>${exp.category}</span>
-                </div>
-                <div class="expense-value">
-                    - ${exp.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                </div>
-            </li>
-        `;
+
+    const filteredExpenses = [...expenses].reverse().filter(exp => {
+        if (!expenseSearchTerm) return true;
+        return `${exp.desc} ${exp.category}`.toLocaleLowerCase('pt-BR').includes(expenseSearchTerm);
     });
+
+    if (filteredExpenses.length === 0) {
+        list.innerHTML = `<li class="empty-state">${expenseSearchTerm ? 'Nenhum gasto encontrado.' : 'Nenhum gasto registrado neste mês.'}</li>`;
+        return;
+    }
+
+    filteredExpenses.forEach(exp => {
+        const item = document.createElement('li');
+        item.className = 'expense-swipe-item';
+        item.dataset.expenseId = exp.id;
+        item.innerHTML = `
+            <div class="expense-item">
+                <div class="expense-info">
+                    <span class="category-icon" aria-hidden="true">${getCategoryIcon(exp.category)}</span>
+                    <div class="expense-copy">
+                        <strong>${escapeHtml(exp.desc)}</strong>
+                        <span>${escapeHtml(exp.category)}</span>
+                    </div>
+                </div>
+                <div class="expense-value">- ${exp.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</div>
+            </div>
+            <span class="swipe-hint" aria-hidden="true">Apagar</span>
+        `;
+        attachSwipeToDelete(item);
+        list.appendChild(item);
+    });
+}
+
+function getCategoryIcon(category) {
+    const icons = {
+        Alimentação: '🍽️', Transporte: '🚗', Saúde: '💊', Lazer: '🎧',
+        Cigarro: '🚬', Bebida: '🍹', Contas: '🏠', Outros: '✦'
+    };
+    return icons[category] || '✦';
+}
+
+function escapeHtml(value) {
+    return String(value).replace(/[&<>'"]/g, character => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+    }[character]));
+}
+
+function attachSwipeToDelete(item) {
+    const content = item.querySelector('.expense-item');
+    let startX = 0;
+    let currentX = 0;
+    let isDragging = false;
+
+    content.addEventListener('touchstart', event => {
+        startX = event.changedTouches[0].screenX;
+        currentX = 0;
+        isDragging = true;
+        content.style.transition = 'none';
+    }, { passive: true });
+
+    content.addEventListener('touchmove', event => {
+        if (!isDragging) return;
+        currentX = Math.min(0, event.changedTouches[0].screenX - startX);
+        if (currentX < 0) content.style.transform = `translateX(${currentX}px)`;
+    }, { passive: true });
+
+    content.addEventListener('touchend', () => {
+        if (!isDragging) return;
+        isDragging = false;
+        content.style.transition = '';
+        if (currentX < -90) {
+            const expenseId = Number(item.dataset.expenseId);
+            deleteExpense(expenseId);
+        } else {
+            content.style.transform = '';
+        }
+    }, { passive: true });
+}
+
+function deleteExpense(expenseId) {
+    const expenses = appData[currentMonthKey].expenses;
+    appData[currentMonthKey].expenses = expenses.filter(expense => expense.id !== expenseId);
+    saveData();
+    updateUI();
 }
 
 // --- Utilitários ---
