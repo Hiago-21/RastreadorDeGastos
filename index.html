@@ -20,8 +20,11 @@
         
         <header>
             <div class="header-top">
-                <h1>Rastreador de Gastos</h1>
-                <select id="month-selector" aria-label="Selecione o mês"></select>
+                <nav class="month-navigation" aria-label="Navegação entre meses">
+                    <button type="button" id="previous-month" aria-label="Mês anterior">&lt;</button>
+                    <span id="month-label" aria-live="polite"></span>
+                    <button type="button" id="next-month" aria-label="Próximo mês">&gt;</button>
+                </nav>
             </div>
             
             <div class="card income-card">

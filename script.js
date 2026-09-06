@@ -20,7 +20,7 @@ function initApp() {
     }
     
     currentMonthKey = thisMonth;
-    populateMonthSelector();
+    updateMonthLabel();
     setupEventListeners();
     updateUI();
 }
@@ -42,8 +42,11 @@ function setupEventListeners() {
     const incomeInput = document.getElementById('income-input');
     const expenseAmountInput = document.getElementById('expense-amount');
     const form = document.getElementById('expense-form');
-    const monthSelector = document.getElementById('month-selector');
+    const previousMonth = document.getElementById('previous-month');
+    const nextMonth = document.getElementById('next-month');
     const btnExport = document.getElementById('btn-export');
+    const monthNavigation = document.querySelector('.header-top');
+    let touchStartX = 0;
 
     // Máscara ao digitar Salário
     incomeInput.addEventListener('input', (e) => {
@@ -74,10 +77,19 @@ function setupEventListeners() {
     });
 
     // Mudar de Mês
-    monthSelector.addEventListener('change', (e) => {
-        currentMonthKey = e.target.value;
-        updateUI();
-    });
+    previousMonth.addEventListener('click', () => changeMonth(-1));
+    nextMonth.addEventListener('click', () => changeMonth(1));
+
+    monthNavigation.addEventListener('touchstart', (e) => {
+        touchStartX = e.changedTouches[0].screenX;
+    }, { passive: true });
+
+    monthNavigation.addEventListener('touchend', (e) => {
+        const distance = e.changedTouches[0].screenX - touchStartX;
+        if (Math.abs(distance) < 50) return;
+
+        changeMonth(distance < 0 ? 1 : -1);
+    }, { passive: true });
 
     // Exportar CSV
     btnExport.addEventListener('click', exportToCSV);
@@ -190,23 +202,11 @@ function renderExpenseList(expenses) {
 }
 
 // --- Utilitários ---
-function populateMonthSelector() {
-    const selector = document.getElementById('month-selector');
-    selector.innerHTML = '';
-    
-    const months = Object.keys(appData).sort().reverse();
-    months.forEach(month => {
-        const [year, m] = month.split('-');
-        const date = new Date(year, m - 1);
-        const name = date.toLocaleString('pt-BR', { month: 'long', year: 'numeric' });
-        
-        const option = document.createElement('option');
-        option.value = month;
-        option.textContent = name.charAt(0).toUpperCase() + name.slice(1);
-        if (month === currentMonthKey) option.selected = true;
-        
-        selector.appendChild(option);
-    });
+function updateMonthLabel() {
+    const [year, month] = currentMonthKey.split('-');
+    const date = new Date(year, Number(month) - 1);
+    const name = date.toLocaleString('pt-BR', { month: 'long' });
+    document.getElementById('month-label').textContent = name.charAt(0).toUpperCase() + name.slice(1);
 }
 
 function saveData() {
@@ -242,4 +242,19 @@ function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
         navigator.serviceWorker.register('sw.js').catch(err => console.log('SW falhou: ', err));
     }
+}
+
+function changeMonth(offset) {
+    const [year, month] = currentMonthKey.split('-').map(Number);
+    const nextDate = new Date(year, month - 1 + offset, 1);
+    const nextMonthKey = `${nextDate.getFullYear()}-${String(nextDate.getMonth() + 1).padStart(2, '0')}`;
+
+    if (!appData[nextMonthKey]) {
+        appData[nextMonthKey] = { income: 0, expenses: [] };
+        saveData();
+    }
+
+    currentMonthKey = nextMonthKey;
+    updateMonthLabel();
+    updateUI();
 }
