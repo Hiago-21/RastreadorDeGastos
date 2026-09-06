@@ -11,21 +11,46 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script src="script.js" defer></script>
 </head>
-<body>
-  <main class="app-shell" id="monthSurface">
+<body class="app-body">
+  <main class="login-screen" id="loginScreen">
+    <div class="login-mark" aria-hidden="true">F</div>
+    <div class="login-copy">
+      <p class="eyebrow">FINTRACKER</p>
+      <h1>Seu dinheiro,<br>mais claro.</h1>
+      <p>Entre com seu e-mail para acessar seu painel financeiro.</p>
+    </div>
+    <form class="login-form" id="loginForm">
+      <label class="form-field" for="loginEmail">
+        <span>Seu e-mail</span>
+        <input id="loginEmail" name="email" type="email" autocomplete="email" inputmode="email" placeholder="voce@exemplo.com" required>
+      </label>
+      <button class="primary-button" type="submit">Receber Magic Link <span>→</span></button>
+      <p class="form-feedback" id="loginFeedback" role="status" aria-live="polite"></p>
+    </form>
+    <p class="login-note">Acesso seguro, sem senha.</p>
+  </main>
+
+  <main class="app-shell" id="monthSurface" hidden>
     <header class="topbar">
       <div>
         <p class="eyebrow">VISÃO GERAL</p>
         <h1 id="monthTitle">Setembro <span id="monthYear">2026</span></h1>
       </div>
-      <div class="month-actions" aria-label="Navegação de mês">
-        <button class="icon-button" id="previousMonth" type="button" aria-label="Mês anterior">‹</button>
-        <button class="icon-button" id="nextMonth" type="button" aria-label="Próximo mês">›</button>
+      <div class="header-actions">
+        <button class="icon-button theme-toggle" id="themeToggle" type="button" aria-label="Alternar tema">◐</button>
+        <button class="logout-button" id="logoutButton" type="button">Sair</button>
+        <div class="month-actions" aria-label="Navegação de mês">
+          <button class="icon-button" id="previousMonth" type="button" aria-label="Mês anterior">‹</button>
+          <button class="icon-button" id="nextMonth" type="button" aria-label="Próximo mês">›</button>
+        </div>
       </div>
     </header>
 
+    <div class="dashboard-grid">
+      <div class="dashboard-main">
     <section class="balance-card" aria-labelledby="balanceLabel">
       <div class="balance-heading">
         <span id="balanceLabel">Saldo livre</span>
@@ -47,6 +72,8 @@
       <article class="stat-card"><span>Gastos</span><strong id="totalSpent">R$ 0,00</strong><small id="expenseCount">0 lançamentos</small></article>
       <article class="stat-card"><span>Maior categoria</span><strong id="topCategory">--</strong><small id="topCategoryAmount">Sem gastos ainda</small></article>
     </section>
+      </div>
+      <div class="dashboard-aside">
 
     <section class="charts-section" aria-label="Análise de gastos">
       <div class="section-heading"><div><p class="eyebrow">ANÁLISE</p><h2>Para onde vai seu dinheiro</h2></div></div>
@@ -61,6 +88,8 @@
       <label class="search-pill" for="searchInput"><span aria-hidden="true">⌕</span><input id="searchInput" type="search" placeholder="Buscar gastos" autocomplete="off"></label>
       <div class="expense-list" id="expenseList"><div class="empty-state"><span class="empty-icon">＋</span><strong>Nenhum gasto por aqui</strong><p>Adicione seu primeiro lançamento para começar.</p></div></div>
     </section>
+      </div>
+    </div>
   </main>
 
   <button class="fab" id="openSheet" type="button" aria-label="Adicionar gasto">+</button>
