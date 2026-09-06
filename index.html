@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Rastreador de Gastos</title>
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        
+        <header>
+            <div class="header-top">
+                <h1>Rastreador de Gastos</h1>
+                <select id="month-selector" aria-label="Selecione o mês"></select>
+            </div>
+            
+            <div class="card income-card">
+                <label for="income-input">Minha Renda Mensal</label>
+                <input type="text" id="income-input" placeholder="R$ 0,00" inputmode="numeric">
+            </div>
+
+            <div class="dashboard-summary">
+                <div class="summary-box">
+                    <span>Gastos</span>
+                    <strong id="total-expenses" class="expense-color">R$ 0,00</strong>
+                </div>
+                <div class="summary-box">
+                    <span>Saldo Livre</span>
+                    <strong id="total-balance">R$ 0,00</strong>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <!-- Sistema de Alertas (IA Baseada em Regras) -->
+            <div id="alerts-container"></div>
+
+            <section class="quick-add">
+                <h2>Adicionar Gasto</h2>
+                <form id="expense-form">
+                    <div class="form-row">
+                        <input type="text" id="expense-amount" placeholder="R$ 0,00" inputmode="numeric" required>
+                        <select id="expense-category" required>
+                            <option value="" disabled selected>Categoria...</option>
+                            <option value="Alimentação">Alimentação</option>
+                            <option value="Transporte">Transporte</option>
+                            <option value="Saúde">Saúde</option>
+                            <option value="Lazer">Lazer</option>
+                            <option value="Cigarro">Cigarro</option>
+                            <option value="Bebida">Bebida</option>
+                            <option value="Contas">Contas Fixas</option>
+                            <option value="Outros">Outros</option>
+                        </select>
+                    </div>
+                    <input type="text" id="expense-desc" placeholder="Descrição rápida (ex: Remédio, Almoço)" required>
+                    <button type="submit" class="btn-primary">Registrar</button>
+                </form>
+            </section>
+
+            <section class="charts-section">
+                <h2>Onde seu dinheiro está indo</h2>
+                <div class="chart-container">
+                    <canvas id="category-chart"></canvas>
+                </div>
+            </section>
+
+            <section class="history-section">
+                <div class="history-header">
+                    <h2>Histórico do Mês</h2>
+                    <button id="btn-export" class="btn-text">Exportar .CSV</button>
+                </div>
+                <ul id="expense-list" class="expense-list">
+                    <!-- Gastos injetados via JS -->
+                </ul>
+            </section>
+        </main>
+    </div>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
