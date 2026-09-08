@@ -8,8 +8,16 @@
   <title>Saldo | Controle financeiro</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="manifest" href="manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(err => console.error('SW falhou:', err));
+      });
+    }
+  </script>
   <style>
     .category-bars{display:none}.chart-wrap canvas{display:block;width:190px!important;height:190px!important}#categoryChart{visibility:hidden}
     .daily-week-controls{display:flex;align-items:center;justify-content:space-between;margin-top:8px}.daily-week-controls button{width:28px;height:28px;border-radius:50%;background:var(--soft);color:var(--text);font-size:18px;line-height:1}.daily-week-controls button:disabled{cursor:not-allowed;opacity:.3}.daily-week-label{color:var(--muted);font-size:10px}
