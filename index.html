@@ -37,6 +37,21 @@
   <script src="script.js" defer></script>
   <script src="chart-fix.js" defer></script>
   <script src="category-detail.js" defer></script>
+
+  <!-- Forçar o navegador a entender que é um App -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<!-- Estilo da barra de status (Bateria/Relógio) -->
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#121212">
+
+<!-- Impedir o zoom ao clicar em inputs e forçar tela cheia (viewport-fit) -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+<!-- Link do Manifest -->
+<link rel="manifest" href="manifest.json">
+
 </head>
 <body class="app-body">
   <main class="login-screen" id="loginScreen">
@@ -116,7 +131,7 @@
     </div>
   </main>
 
-  <button class="fab" id="openSheet" type="button" aria-label="Adicionar gasto">+</button>
+  <button class="fab" id="openSheet" aria-label="Adicionar gasto">Adicionar</button>
   <div class="scrim" id="scrim" hidden></div>
   <section class="chart-detail-modal" id="dailyDetailModal" role="dialog" aria-modal="true" aria-labelledby="dailyDetailTitle" hidden>
     <div class="sheet-heading"><div><p class="eyebrow">ANÁLISE COMPLETA</p><h2 id="dailyDetailTitle">Gastos por dia</h2></div><button class="close-button" id="closeDailyDetail" type="button" aria-label="Fechar">×</button></div>
@@ -140,7 +155,7 @@
       </div>
       <label class="form-field"><span>Categoria</span><select id="categorySelect"></select></label>
       <div class="custom-category" id="customCategoryBox" hidden><label class="form-field"><span>Nome da nova categoria</span><input id="customCategoryInput" maxlength="24" placeholder="Ex.: Pets"></label></div>
-      <fieldset class="advanced-fieldset"><legend>Opções avançadas</legend><div class="type-pills" role="radiogroup" aria-label="Tipo de gasto"><label><input type="radio" name="expenseType" value="single" checked><span>Único</span></label><label><input type="radio" name="expenseType" value="fixed"><span>Fixo / mensal</span></label><label><input type="radio" name="expenseType" value="installment"><span>Parcelado</span></label></div><label class="form-field installment-field" id="installmentBox" hidden><span>Quantidade de parcelas</span><input id="installmentInput" type="number" min="2" max="60" value="2"></label></fieldset>
+      <details class="advanced-fieldset"><summary style="cursor:pointer; color:var(--accent); font-weight:700; margin-bottom:15px; user-select:none; outline:none;">Opções avançadas (Parcelas, Mensalidade)</summary><div class="type-pills" role="radiogroup" aria-label="Tipo de gasto"><label><input type="radio" name="expenseType" value="single" checked><span>Único</span></label><label><input type="radio" name="expenseType" value="fixed"><span>Fixo / mensal</span></label><label><input type="radio" name="expenseType" value="installment"><span>Parcelado</span></label></div><label class="form-field installment-field" id="installmentBox" hidden><span>Quantidade de parcelas</span><input id="installmentInput" type="number" min="2" max="60" value="2"></label></details>
       <p class="form-feedback" id="formFeedback" role="alert"></p>
       <button class="primary-button" type="submit">Adicionar gasto <span>→</span></button>
     </form>

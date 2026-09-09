@@ -1,5 +1,5 @@
 (() => {
-  const palette = ['#6d7cff', '#a66cff', '#26d6a2', '#37b9f1', '#f08cff', '#f4b860', '#f4b860', '#ef8b8b'];
+  const palette = ['#2563eb', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#0ea5e9', '#14b8a6', '#f43f5e'];
   let detailChart;
 
   function money(value) { return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value || 0); }
