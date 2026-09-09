@@ -4,6 +4,8 @@ const ASSETS = [
   '/index.html',
   '/style.css',
   '/script.js',
+  '/chart-fix.js',
+  '/category-detail.js',
   '/manifest.json'
 ];
 
