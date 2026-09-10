@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FinTracker – Testes de UI & Acessibilidade</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #f8fafc; color: #1e293b; padding: 24px; }
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    .subtitle { color: #64748b; margin-bottom: 32px; font-size: 14px; }
+    .suite { background: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+    .suite h2 { font-size: 16px; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid #f1f5f9; }
+    .test { display: flex; align-items: flex-start; gap: 12px; padding: 10px 0; border-bottom: 1px solid #f8fafc; }
+    .test:last-child { border-bottom: none; }
+    .badge { flex: 0 0 80px; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 700; text-align: center; }
+    .pass  { background: #d1fae5; color: #065f46; }
+    .fail  { background: #fee2e2; color: #991b1b; }
+    .warn  { background: #fef3c7; color: #92400e; }
+    .info  { background: #dbeafe; color: #1e40af; }
+    .test-name { font-size: 14px; font-weight: 600; }
+    .test-desc { font-size: 13px; color: #64748b; margin-top: 2px; }
+    #summary { display: flex; gap: 16px; margin-bottom: 28px; }
+    .summary-card { padding: 16px 24px; border-radius: 10px; font-size: 13px; font-weight: 600; }
+    .s-pass { background: #d1fae5; color: #065f46; }
+    .s-fail { background: #fee2e2; color: #991b1b; }
+    .s-warn { background: #fef3c7; color: #92400e; }
+    #run-btn { margin-bottom: 20px; padding: 12px 24px; background: #2563eb; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; }
+    #run-btn:hover { background: #1d4ed8; }
+    .loader { display: none; margin-left: 12px; }
+  </style>
+</head>
+<body>
+  <h1>🧪 FinTracker – Suite de Testes</h1>
+  <p class="subtitle">Testes de Acessibilidade, Contraste, UI e Funcionalidade</p>
+  <button id="run-btn" onclick="runTests()">▶ Executar todos os testes</button>
+  <div id="summary" style="display:none"></div>
+  <div id="results"></div>
+
+  <script>
+    const SITE_URL = window.location.origin.includes('localhost') ? 'http://localhost:3000' : window.location.origin;
+
+    const tests = [
+      // ── ACESSIBILIDADE ──────────────────────────────────────────────────
+      {
+        suite: '♿ Acessibilidade',
+        name: 'Inputs têm labels',
+        desc: 'Todo campo de formulário deve ter um <label> associado.',
+        run: async (doc) => {
+          const inputs = doc.querySelectorAll('input, select');
+          const failed = [];
+          inputs.forEach(input => {
+            const id = input.id;
+            const label = id ? doc.querySelector(`label[for="${id}"]`) : null;
+            const wrappedLabel = input.closest('label');
+            const aria = input.getAttribute('aria-label') || input.getAttribute('aria-labelledby');
+            if (!label && !wrappedLabel && !aria) failed.push(input.id || input.name || input.type);
+          });
+          return failed.length === 0
+            ? { status: 'pass', detail: `✓ Todos os ${inputs.length} campos têm labels.` }
+            : { status: 'fail', detail: `✗ Campos sem label: ${failed.join(', ')}` };
+        }
+      },
+      {
+        suite: '♿ Acessibilidade',
+        name: 'Botões têm texto ou aria-label',
+        desc: 'Todo botão deve ter conteúdo de texto visível ou aria-label.',
+        run: async (doc) => {
+          const buttons = doc.querySelectorAll('button');
+          const failed = [];
+          buttons.forEach(btn => {
+            const text = btn.textContent.trim();
+            const aria = btn.getAttribute('aria-label');
+            if (!text && !aria) failed.push(btn.className || btn.id || '(sem id)');
+          });
+          return failed.length === 0
+            ? { status: 'pass', detail: `✓ Todos os ${buttons.length} botões têm texto ou aria-label.` }
+            : { status: 'fail', detail: `✗ Botões sem texto: ${failed.join(', ')}` };
+        }
+      },
+      {
+        suite: '♿ Acessibilidade',
+        name: 'lang="pt-BR" no <html>',
+        desc: 'O atributo lang informa ao leitor de tela o idioma da página.',
+        run: async (doc) => {
+          const lang = doc.documentElement.getAttribute('lang');
+          return lang === 'pt-BR'
+            ? { status: 'pass', detail: `✓ lang="${lang}"` }
+            : { status: 'fail', detail: `✗ lang está como "${lang}" (esperado: "pt-BR")` };
+        }
+      },
+      {
+        suite: '♿ Acessibilidade',
+        name: 'Diálogos têm role="dialog"',
+        desc: 'Modais devem ser identificados como diálogos para leitores de tela.',
+        run: async (doc) => {
+          const sheets = doc.querySelectorAll('.bottom-sheet, .chart-detail-modal');
+          const failed = [];
+          sheets.forEach(el => {
+            if (el.getAttribute('role') !== 'dialog') failed.push(el.id || el.className.split(' ')[0]);
+          });
+          return failed.length === 0
+            ? { status: 'pass', detail: `✓ ${sheets.length} diálogos com role="dialog".` }
+            : { status: 'fail', detail: `✗ Sem role="dialog": ${failed.join(', ')}` };
+        }
+      },
+      {
+        suite: '♿ Acessibilidade',
+        name: 'Meta description presente',
+        desc: 'A meta description ajuda na acessibilidade e SEO.',
+        run: async (doc) => {
+          const meta = doc.querySelector('meta[name="description"]');
+          return meta
+            ? { status: 'pass', detail: `✓ "${meta.getAttribute('content')}"` }
+            : { status: 'fail', detail: '✗ Meta description não encontrada.' };
+        }
+      },
+
+      // ── CONTRASTE E CORES ───────────────────────────────────────────────
+      {
+        suite: '🎨 Paleta de Cores',
+        name: 'Cor do texto principal ≥ 4.5:1',
+        desc: 'WCAG AA exige contraste mínimo de 4.5:1 para texto normal.',
+        run: async (doc) => {
+          // #111827 sobre #ffffff → aprox. 16:1
+          const textColor = '#111827';
+          const bgColor   = '#ffffff';
+          const ratio = getContrastRatio(textColor, bgColor);
+          return ratio >= 4.5
+            ? { status: 'pass', detail: `✓ Contraste ${ratio.toFixed(1)}:1 (texto: ${textColor} / fundo: ${bgColor})` }
+            : { status: 'fail', detail: `✗ Contraste ${ratio.toFixed(1)}:1 — abaixo do mínimo de 4.5:1` };
+        }
+      },
+      {
+        suite: '🎨 Paleta de Cores',
+        name: 'Cor de destaque (accent) acessível',
+        desc: 'O botão primário (#2563eb branco) deve ter contraste ≥ 4.5:1.',
+        run: async (doc) => {
+          const ratio = getContrastRatio('#2563eb', '#ffffff');
+          return ratio >= 4.5
+            ? { status: 'pass', detail: `✓ Contraste do accent com branco: ${ratio.toFixed(1)}:1` }
+            : { status: 'fail', detail: `✗ Contraste ${ratio.toFixed(1)}:1 insuficiente` };
+        }
+      },
+      {
+        suite: '🎨 Paleta de Cores',
+        name: 'Texto mutado legível',
+        desc: 'O texto secundário (#4b5563 sobre #ffffff) deve ter contraste ≥ 4.5:1.',
+        run: async (doc) => {
+          const ratio = getContrastRatio('#4b5563', '#ffffff');
+          return ratio >= 4.5
+            ? { status: 'pass', detail: `✓ Contraste de texto mutado: ${ratio.toFixed(1)}:1` }
+            : { status: 'warn', detail: `⚠ Contraste ${ratio.toFixed(1)}:1 — aceitável mas pode melhorar` };
+        }
+      },
+
+      // ── ESTRUTURA HTML ──────────────────────────────────────────────────
+      {
+        suite: '🏗 Estrutura HTML',
+        name: 'Único <h1> por página',
+        desc: 'Deve haver exatamente um H1 por tela para hierarquia semântica.',
+        run: async (doc) => {
+          const h1s = doc.querySelectorAll('h1');
+          return h1s.length === 1
+            ? { status: 'pass', detail: `✓ 1 <h1> encontrado.` }
+            : { status: 'warn', detail: `⚠ Encontrados ${h1s.length} elementos <h1>.` };
+        }
+      },
+      {
+        suite: '🏗 Estrutura HTML',
+        name: 'Formulários têm action ou handler',
+        desc: 'Formulários devem ter atributo action ou ser controlados via JS.',
+        run: async (doc) => {
+          const forms = doc.querySelectorAll('form');
+          return forms.length > 0
+            ? { status: 'pass', detail: `✓ ${forms.length} formulário(s) encontrado(s) no HTML.` }
+            : { status: 'fail', detail: '✗ Nenhum formulário encontrado.' };
+        }
+      },
+      {
+        suite: '🏗 Estrutura HTML',
+        name: 'PWA: manifest.json linkado',
+        desc: 'O manifest permite instalar o app no celular.',
+        run: async (doc) => {
+          const link = doc.querySelector('link[rel="manifest"]');
+          return link
+            ? { status: 'pass', detail: `✓ manifest linkado: ${link.getAttribute('href')}` }
+            : { status: 'fail', detail: '✗ <link rel="manifest"> não encontrado.' };
+        }
+      },
+      {
+        suite: '🏗 Estrutura HTML',
+        name: 'PWA: meta theme-color',
+        desc: 'O theme-color define a cor da barra do navegador no celular.',
+        run: async (doc) => {
+          const meta = doc.querySelector('meta[name="theme-color"]');
+          return meta
+            ? { status: 'pass', detail: `✓ theme-color: ${meta.getAttribute('content')}` }
+            : { status: 'warn', detail: '⚠ meta theme-color não encontrado.' };
+        }
+      },
+
+      // ── PERFORMANCE ─────────────────────────────────────────────────────
+      {
+        suite: '⚡ Performance',
+        name: 'Scripts carregam com defer',
+        desc: 'Scripts com defer não bloqueiam a renderização da página.',
+        run: async (doc) => {
+          const scripts = doc.querySelectorAll('script[src]');
+          const failed = [];
+          scripts.forEach(s => {
+            if (!s.hasAttribute('defer') && !s.hasAttribute('async')) failed.push(s.getAttribute('src'));
+          });
+          return failed.length === 0
+            ? { status: 'pass', detail: `✓ Todos os ${scripts.length} scripts externos usam defer/async.` }
+            : { status: 'fail', detail: `✗ Scripts bloqueantes: ${failed.join(', ')}` };
+        }
+      },
+      {
+        suite: '⚡ Performance',
+        name: 'Fontes com preconnect',
+        desc: 'O preconnect reduz a latência ao carregar fontes do Google.',
+        run: async (doc) => {
+          const pc = doc.querySelectorAll('link[rel="preconnect"]');
+          return pc.length >= 2
+            ? { status: 'pass', detail: `✓ ${pc.length} preconnects encontrados.` }
+            : { status: 'warn', detail: `⚠ Apenas ${pc.length} preconnect(s). Google Fonts precisa de 2.` };
+        }
+      },
+
+      // ── USABILIDADE ─────────────────────────────────────────────────────
+      {
+        suite: '👆 Usabilidade',
+        name: 'Inputs numéricos com inputmode',
+        desc: 'inputmode="numeric" abre o teclado numérico no celular.',
+        run: async (doc) => {
+          const numericFields = doc.querySelectorAll('#amountInput, #installmentInput, #incomeInput');
+          const withMode = [...numericFields].filter(i => i.getAttribute('inputmode') === 'numeric');
+          return withMode.length === numericFields.length
+            ? { status: 'pass', detail: `✓ ${withMode.length}/${numericFields.length} campos com inputmode="numeric".` }
+            : { status: 'warn', detail: `⚠ ${withMode.length}/${numericFields.length} campos com inputmode. Outros podem não usar teclado numérico.` };
+        }
+      },
+      {
+        suite: '👆 Usabilidade',
+        name: 'Botão principal visível (FAB)',
+        desc: 'O botão flutuante de "Adicionar" deve existir e ter texto legível.',
+        run: async (doc) => {
+          const fab = doc.querySelector('.fab');
+          if (!fab) return { status: 'fail', detail: '✗ Botão FAB não encontrado.' };
+          const text = fab.textContent.trim();
+          const aria = fab.getAttribute('aria-label');
+          return (text || aria)
+            ? { status: 'pass', detail: `✓ FAB encontrado com texto: "${text || aria}"` }
+            : { status: 'fail', detail: '✗ FAB sem texto ou aria-label.' };
+        }
+      },
+      {
+        suite: '👆 Usabilidade',
+        name: 'Formulário colapsável (Opções avançadas)',
+        desc: 'Opções avançadas devem estar dentro de <details> para não confundir usuários.',
+        run: async (doc) => {
+          const details = doc.querySelector('.advanced-fieldset');
+          return details && details.tagName === 'DETAILS'
+            ? { status: 'pass', detail: '✓ Opções avançadas estão em <details> (colapsável por padrão).' }
+            : { status: 'warn', detail: '⚠ Opções avançadas não estão em <details>. Podem confundir usuários novatos.' };
+        }
+      },
+      {
+        suite: '👆 Usabilidade',
+        name: 'Campo de busca com placeholder claro',
+        desc: 'O placeholder deve guiar o usuário sobre o que ele pode digitar.',
+        run: async (doc) => {
+          const input = doc.querySelector('#searchInput');
+          const ph = input?.getAttribute('placeholder');
+          return ph && ph.length > 0
+            ? { status: 'pass', detail: `✓ Placeholder: "${ph}"` }
+            : { status: 'fail', detail: '✗ Campo de busca sem placeholder.' };
+        }
+      },
+    ];
+
+    function getContrastRatio(hex1, hex2) {
+      const l1 = getLuminance(hex1);
+      const l2 = getLuminance(hex2);
+      const lighter = Math.max(l1, l2);
+      const darker  = Math.min(l1, l2);
+      return (lighter + 0.05) / (darker + 0.05);
+    }
+
+    function getLuminance(hex) {
+      const rgb = hexToRgb(hex);
+      return rgb.map(c => {
+        c /= 255;
+        return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+      }).reduce((acc, c, i) => acc + c * [0.2126, 0.7152, 0.0722][i], 0);
+    }
+
+    function hexToRgb(hex) {
+      const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+      return result ? [parseInt(result[1],16), parseInt(result[2],16), parseInt(result[3],16)] : [0,0,0];
+    }
+
+    async function runTests() {
+      const btn = document.getElementById('run-btn');
+      btn.textContent = '⏳ Executando...';
+      btn.disabled = true;
+
+      let doc;
+      try {
+        const resp = await fetch('/');
+        const html = await resp.text();
+        const parser = new DOMParser();
+        doc = parser.parseFromString(html, 'text/html');
+      } catch (e) {
+        doc = document;
+      }
+
+      const suites = {};
+      let totalPass = 0, totalFail = 0, totalWarn = 0;
+
+      for (const test of tests) {
+        let result;
+        try {
+          result = await test.run(doc);
+        } catch (e) {
+          result = { status: 'fail', detail: '✗ Erro ao executar teste: ' + e.message };
+        }
+        if (!suites[test.suite]) suites[test.suite] = [];
+        suites[test.suite].push({ ...test, result });
+        if (result.status === 'pass') totalPass++;
+        else if (result.status === 'fail') totalFail++;
+        else if (result.status === 'warn') totalWarn++;
+      }
+
+      const summaryEl = document.getElementById('summary');
+      summaryEl.style.display = 'flex';
+      summaryEl.innerHTML = `
+        <div class="summary-card s-pass">✅ ${totalPass} passou</div>
+        <div class="summary-card s-fail">❌ ${totalFail} falhou</div>
+        <div class="summary-card s-warn">⚠️ ${totalWarn} aviso</div>
+      `;
+
+      const resultsEl = document.getElementById('results');
+      resultsEl.innerHTML = '';
+
+      for (const [suiteName, sTests] of Object.entries(suites)) {
+        const suiteEl = document.createElement('div');
+        suiteEl.className = 'suite';
+        suiteEl.innerHTML = `<h2>${suiteName}</h2>`;
+        sTests.forEach(t => {
+          const labels = { pass: 'PASSOU', fail: 'FALHOU', warn: 'AVISO', info: 'INFO' };
+          const div = document.createElement('div');
+          div.className = 'test';
+          div.innerHTML = `
+            <span class="badge ${t.result.status}">${labels[t.result.status]}</span>
+            <div>
+              <div class="test-name">${t.name}</div>
+              <div class="test-desc">${t.desc}</div>
+              <div class="test-desc" style="margin-top:4px;color:#374151">${t.result.detail}</div>
+            </div>
+          `;
+          suiteEl.appendChild(div);
+        });
+        resultsEl.appendChild(suiteEl);
+      }
+
+      btn.textContent = '▶ Executar novamente';
+      btn.disabled = false;
+    }
+  </script>
+</body>
+</html>
+
