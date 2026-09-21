@@ -56,6 +56,9 @@
       fullColors = daily.data.datasets[0].backgroundColor.slice();
       fullSignature = signature;
       weekIndex = 0;
+      if (window.FinTracker?.state?.month === new Date().toISOString().slice(0, 7)) {
+        weekIndex = Math.floor((new Date().getDate() - 1) / 7);
+      }
     }
     if (fullLabels.length) renderWeek();
   }

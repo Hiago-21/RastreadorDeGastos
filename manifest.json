@@ -1,24 +1,36 @@
 {
-  "name": "FinTracker",
+  "name": "FinTracker – Controle Financeiro",
   "short_name": "FinTracker",
-  "description": "Seu controle financeiro pessoal, simples e elegante.",
-  "start_url": "/index.html",
+  "description": "Seu controle financeiro pessoal, simples e sem complicação.",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "background_color": "#121212",
-  "theme_color": "#121212",
+  "orientation": "portrait-primary",
+  "background_color": "#2D4354",
+  "theme_color": "#2D4354",
+  "lang": "pt-BR",
+  "categories": ["finance", "productivity"],
   "icons": [
     {
-      "src": "img/FinTracker_192.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "src": "img/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
     },
     {
-      "src": "img/FinTracker_512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any maskable"
+      "src": "img/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Adicionar gasto",
+      "short_name": "Adicionar",
+      "description": "Abrir formulário de novo gasto",
+      "url": "/?action=add",
+      "icons": [{ "src": "img/icon.svg", "sizes": "any" }]
     }
   ]
 }
-

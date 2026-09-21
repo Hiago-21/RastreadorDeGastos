@@ -2,55 +2,105 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#ffffff">
-  <meta name="description" content="Controle financeiro pessoal simples e elegante.">
-  <title>Saldo | Controle financeiro</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💸</text></svg>">
+  <!-- Viewport: viewport-fit=cover oculta barra de endereço no modo standalone -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+
+  <!-- PWA: cores e tema -->
+  <meta name="theme-color" content="#2D4354">
+  <meta name="background-color" content="#2D4354">
+
+  <!-- iOS: comportamento de app instalado -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FinTracker">
+
+  <!-- Android / Chrome -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="FinTracker">
+
+  <!-- SEO & Share -->
+  <meta name="description" content="Controle financeiro pessoal simples, sem complicação.">
+  <title>FinTracker | Controle financeiro</title>
+
+  <!-- Ícone SVG (funciona em todos os navegadores modernos) -->
+  <link rel="icon" href="img/icon.svg" type="image/svg+xml">
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" href="img/icon.svg">
+
+  <!-- Manifest PWA -->
+  <link rel="manifest" href="manifest.json">
+
+  <!-- Fontes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="manifest" href="manifest.json">
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Estilos -->
   <link rel="stylesheet" href="style.css">
+
+  <!-- Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch(err => console.error('SW falhou:', err));
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('SW registrado:', reg.scope))
+          .catch(err => console.error('SW falhou:', err));
       });
     }
+    // Detecta atalho de app (?action=add) e abre o form ao carregar
+    if (new URLSearchParams(location.search).get('action') === 'add') {
+      window.addEventListener('fintracker-ready', () => {
+        document.getElementById('openSheet')?.click();
+      }, { once: true });
+    }
   </script>
+
   <style>
-    .category-bars{display:none}.chart-wrap canvas{display:block;width:190px!important;height:190px!important}#categoryChart{visibility:hidden}
-    .daily-week-controls{display:flex;align-items:center;justify-content:space-between;margin-top:8px}.daily-week-controls button{width:28px;height:28px;border-radius:50%;background:var(--soft);color:var(--text);font-size:18px;line-height:1}.daily-week-controls button:disabled{cursor:not-allowed;opacity:.3}.daily-week-label{color:var(--muted);font-size:10px}
-    .bar-chart-wrap{width:100%;height:190px;margin-top:15px;overflow:hidden}
-    .bar-chart-wrap canvas{display:block;width:100%!important;min-width:0!important;max-width:100%!important;height:190px!important}
-    .chart-detail-button{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:12px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--muted);font-size:11px}
+    /* Gráfico donut */
+    .category-bars{display:none}
+    .chart-wrap canvas{display:block;width:190px!important;height:190px!important}
+    #categoryChart{visibility:visible}
+
+    /* Gráfico de barras – permite scroll horizontal e canvas largo */
+    .bar-chart-wrap{width:100%;height:215px;margin-top:15px;overflow-x:auto;overflow-y:hidden}
+    .bar-chart-wrap canvas{display:block;height:215px!important}
+
+    /* Controles semanais */
+    .daily-week-controls{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+    .daily-week-controls button{width:36px;height:36px;border-radius:50%;background:var(--soft);color:var(--text);font-size:20px;line-height:1;border:1px solid var(--line);cursor:pointer}
+    .daily-week-controls button:disabled{cursor:not-allowed;opacity:.3}
+    .daily-week-label{color:var(--muted);font-size:13px;font-weight:600}
+
+    /* Botão de detalhe */
+    .chart-detail-button{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;margin-top:12px;padding:12px 12px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--muted);font-size:13px;cursor:pointer}
     .chart-detail-button:hover{border-color:var(--accent);color:var(--text);background:var(--soft)}
+
+    /* Modais de detalhe */
     .chart-detail-modal{position:fixed;inset:50% auto auto 50%;z-index:11;width:min(94vw,1060px);max-height:90vh;overflow:auto;padding:24px;border:1px solid var(--line);border-radius:22px;background:var(--bg);box-shadow:0 20px 70px rgba(0,0,0,.35);transform:translate(-50%,-50%);animation:rise .25s ease}
     .daily-detail-chart{width:100%;min-height:360px}.daily-detail-chart canvas{display:block;width:100%!important;height:360px!important}
-    .category-detail-modal{width:min(94vw,720px)}.category-detail-filter{margin-bottom:12px}.category-detail-summary{display:flex;align-items:baseline;justify-content:space-between;margin:4px 0 12px}.category-detail-summary strong{font:800 24px Manrope}.category-detail-summary span{color:var(--muted);font-size:11px}.category-detail-chart{height:auto;min-height:100px}.category-detail-bars{display:grid;gap:14px}.category-detail-bar-row{display:grid;gap:6px}.category-detail-bar-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:12px}.category-detail-bar-meta span:first-child{font-weight:600}.category-detail-bar-meta span:last-child{color:var(--muted);font-weight:600;white-space:nowrap}.category-detail-bar-track{height:12px;overflow:hidden;border-radius:99px;background:var(--soft)}.category-detail-bar-fill{height:100%;border-radius:inherit;background:var(--bar-color)}.category-detail-list{display:grid;gap:8px;max-height:230px;overflow:auto;margin-top:16px}.category-detail-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 12px;border-radius:12px;background:var(--surface);font-size:12px}.category-detail-item div{min-width:0}.category-detail-item strong,.category-detail-item small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.category-detail-item small{margin-top:3px;color:var(--muted);font-size:11px}.category-detail-item>strong{white-space:nowrap}
+    .category-detail-modal{width:min(94vw,720px)}.category-detail-filter{margin-bottom:12px}.category-detail-summary{display:flex;align-items:baseline;justify-content:space-between;margin:4px 0 12px}.category-detail-summary strong{font:800 24px Manrope}.category-detail-summary span{color:var(--muted);font-size:13px}.category-detail-chart{height:auto;min-height:100px}.category-detail-bars{display:grid;gap:14px}.category-detail-bar-row{display:grid;gap:6px}.category-detail-bar-meta{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px}.category-detail-bar-meta span:first-child{font-weight:600}.category-detail-bar-meta span:last-child{color:var(--muted);font-weight:600;white-space:nowrap}.category-detail-bar-track{height:12px;overflow:hidden;border-radius:99px;background:var(--soft)}.category-detail-bar-fill{height:100%;border-radius:inherit;background:var(--bar-color)}.category-detail-list{display:grid;gap:8px;max-height:230px;overflow:auto;margin-top:16px}.category-detail-item{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 14px;border-radius:12px;background:var(--surface);font-size:13px}.category-detail-item div{min-width:0}.category-detail-item strong,.category-detail-item small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.category-detail-item small{margin-top:3px;color:var(--muted);font-size:12px}.category-detail-item>strong{white-space:nowrap}
+
+    /* ── Tutorial de boas-vindas ── */
+    .tutorial-overlay{position:fixed;inset:0;z-index:100;background:rgba(32,33,43,.75);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px}
+    .tutorial-card{background:var(--surface);border:1px solid var(--line);border-radius:28px;padding:32px 28px;width:min(100%,420px);box-shadow:0 30px 80px rgba(0,0,0,.35);animation:rise .35s ease}
+    .tutorial-step{display:none}.tutorial-step.active{display:block}
+    .tutorial-icon{font-size:52px;margin-bottom:16px;display:block;text-align:center}
+    .tutorial-title{font:800 22px/1.2 Manrope;margin-bottom:10px;text-align:center;color:var(--text)}
+    .tutorial-desc{font-size:15px;line-height:1.65;color:var(--muted);text-align:center;margin-bottom:24px}
+    .tutorial-dots{display:flex;justify-content:center;gap:8px;margin-bottom:24px}
+    .tutorial-dot{width:8px;height:8px;border-radius:50%;background:var(--line);transition:.2s}
+    .tutorial-dot.active{background:var(--accent);width:20px;border-radius:99px}
+    .tutorial-next{width:100%;height:52px;border-radius:16px;background:var(--accent);color:#fff;font-size:16px;font-weight:800;border:none;cursor:pointer;transition:.15s}
+    .tutorial-next:hover{opacity:.88}
+    .tutorial-skip{display:block;width:100%;margin-top:12px;text-align:center;background:transparent;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:8px}
+    .tutorial-skip:hover{color:var(--text)}
+    @media(min-width:651px) and (max-width:900px){.dashboard-aside{grid-template-columns:1fr}}
   </style>
-  <style>.bar-chart-wrap canvas { height: 190px !important; }</style>
-  <style>@media (min-width: 651px) and (max-width: 900px) { .dashboard-aside { grid-template-columns: 1fr; } }</style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
   <script src="script.js" defer></script>
   <script src="chart-fix.js" defer></script>
   <script src="category-detail.js" defer></script>
-
-  <!-- Forçar o navegador a entender que é um App -->
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-
-<!-- Estilo da barra de status (Bateria/Relógio) -->
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#121212">
-
-<!-- Impedir o zoom ao clicar em inputs e forçar tela cheia (viewport-fit) -->
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-
-<!-- Link do Manifest -->
-<link rel="manifest" href="manifest.json">
 
 </head>
 <body class="app-body">
@@ -114,12 +164,13 @@
       </div>
       <div class="dashboard-aside">
 
-    <section class="charts-section" aria-label="Análise de gastos">
-      <div class="section-heading"><div><p class="eyebrow">ANÁLISE</p><h2>Para onde vai seu dinheiro</h2></div></div>
-      <div class="charts-grid">
-        <article class="chart-card donut-card"><div class="chart-wrap"><canvas id="categoryChart" aria-label="Gastos por categoria"></canvas><div class="chart-center"><strong id="chartTotal">R$ 0</strong><span>no mês</span></div></div><div class="legend" id="categoryLegend"></div><button class="chart-detail-button" id="openCategoryDetail" type="button"><span aria-hidden="true">↗</span> Ver gráfico detalhado</button></article>
-        <article class="chart-card bar-card"><div class="chart-card-heading"><span>Ritmo diário</span><span id="averageDaily">R$ 0/dia</span></div><div class="bar-chart-wrap"><canvas id="dailyChart" aria-label="Gastos diários"></canvas></div><div class="daily-week-controls"><button id="previousDailyWeek" type="button" aria-label="Semana anterior">‹</button><span class="daily-week-label" id="dailyWeekLabel">Semana atual</span><button id="nextDailyWeek" type="button" aria-label="Próxima semana">›</button></div><button class="chart-detail-button" id="openDailyDetail" type="button"><span aria-hidden="true">↗</span> Ver gráfico detalhado</button></article>
-      </div>
+    <section class="charts-entry-section" aria-label="Análise de gastos" style="margin-bottom: 30px;">
+      <article class="stat-card" style="text-align: center; padding: 28px 20px;">
+        <div style="font-size: 42px; margin-bottom: 12px;">📊</div>
+        <strong style="font-size: 20px; margin-bottom: 8px;">Análise Visual</strong>
+        <p style="color: var(--muted); font-size: 14px; margin-bottom: 20px;">Veja para onde vai o seu dinheiro através de gráficos.</p>
+        <button class="primary-button" id="openChartsModalBtn" type="button" style="height: 52px; font-size: 16px; width: auto; margin: 0 auto; padding: 0 30px;">Ver gráficos <span>→</span></button>
+      </article>
     </section>
 
     <section class="history-section" aria-labelledby="historyTitle">
@@ -133,6 +184,16 @@
 
   <button class="fab" id="openSheet" aria-label="Adicionar gasto">Adicionar</button>
   <div class="scrim" id="scrim" hidden></div>
+  <section class="chart-detail-modal" id="chartsModal" role="dialog" aria-modal="true" aria-labelledby="chartsModalTitle" hidden style="background:var(--bg); max-height: 95vh;">
+    <div class="sheet-heading" style="margin-bottom: 24px; position: sticky; top: -24px; background: var(--bg); z-index: 2; padding: 24px 0 16px;">
+      <div><p class="eyebrow">ANÁLISE VISUAL</p><h2 id="chartsModalTitle">Gráficos do Mês</h2></div>
+      <button class="close-button" id="closeChartsModal" type="button" aria-label="Fechar">×</button>
+    </div>
+    <div class="charts-grid" style="display: flex; flex-direction: column; gap: 24px;">
+      <article class="chart-card donut-card" style="box-shadow:none;"><div class="chart-wrap"><canvas id="categoryChart" aria-label="Gastos por categoria"></canvas><div class="chart-center"><strong id="chartTotal">R$ 0</strong><span>no mês</span></div></div><div class="legend" id="categoryLegend"></div><button class="chart-detail-button" id="openCategoryDetail" type="button"><span aria-hidden="true">↗</span> Ver gráfico detalhado</button></article>
+      <article class="chart-card bar-card" style="box-shadow:none;"><div class="chart-card-heading"><span>Ritmo diário</span><span id="averageDaily">R$ 0/dia</span></div><div class="bar-chart-wrap"><canvas id="dailyChart" aria-label="Gastos diários"></canvas></div><div class="daily-week-controls"><button id="previousDailyWeek" type="button" aria-label="Semana anterior">‹</button><span class="daily-week-label" id="dailyWeekLabel">Semana atual</span><button id="nextDailyWeek" type="button" aria-label="Próxima semana">›</button></div><button class="chart-detail-button" id="openDailyDetail" type="button"><span aria-hidden="true">↗</span> Ver gráfico detalhado</button></article>
+    </div>
+  </section>
   <section class="chart-detail-modal" id="dailyDetailModal" role="dialog" aria-modal="true" aria-labelledby="dailyDetailTitle" hidden>
     <div class="sheet-heading"><div><p class="eyebrow">ANÁLISE COMPLETA</p><h2 id="dailyDetailTitle">Gastos por dia</h2></div><button class="close-button" id="closeDailyDetail" type="button" aria-label="Fechar">×</button></div>
     <div class="daily-detail-chart"><canvas id="dailyDetailChart" aria-label="Gráfico detalhado de gastos diários"></canvas></div>
@@ -160,5 +221,93 @@
       <button class="primary-button" type="submit">Adicionar gasto <span>→</span></button>
     </form>
   </section>
+  <!-- Tutorial de boas-vindas -->
+  <div class="tutorial-overlay" id="tutorialOverlay" hidden>
+    <div class="tutorial-card">
+      <div class="tutorial-step active" id="ts0">
+        <span class="tutorial-icon">👋</span>
+        <p class="tutorial-title">Bem-vindo ao FinTracker!</p>
+        <p class="tutorial-desc">Este app ajuda você a saber para onde vai o seu dinheiro, de forma simples e sem complicação. Leva menos de 1 minuto para aprender!</p>
+      </div>
+      <div class="tutorial-step" id="ts1">
+        <span class="tutorial-icon">➕</span>
+        <p class="tutorial-title">Adicione um gasto</p>
+        <p class="tutorial-desc">Toque no botão <strong>"Adicionar"</strong> no canto inferior da tela sempre que gastar dinheiro. Coloque o nome, o valor e a categoria do gasto.</p>
+      </div>
+      <div class="tutorial-step" id="ts2">
+        <span class="tutorial-icon">💰</span>
+        <p class="tutorial-title">Coloque sua renda</p>
+        <p class="tutorial-desc">No card <strong>"Saldo livre"</strong>, toque no campo ao lado de <strong>R$</strong> e digite quanto você ganha por mês. O app calculará quanto você ainda tem disponível.</p>
+      </div>
+      <div class="tutorial-step" id="ts3">
+        <span class="tutorial-icon">📅</span>
+        <p class="tutorial-title">Navegue entre os meses</p>
+        <p class="tutorial-desc">Use as setas <strong>‹ ›</strong> no canto superior direito para ver os gastos de meses anteriores ou do próximo mês.</p>
+      </div>
+      <div class="tutorial-step" id="ts4">
+        <span class="tutorial-icon">🗑️</span>
+        <p class="tutorial-title">Como excluir um gasto</p>
+        <p class="tutorial-desc">No celular, <strong>deslize um gasto para a esquerda</strong> para aparecer o botão "Excluir". No computador, clique e arraste para o lado.</p>
+      </div>
+      <div class="tutorial-step" id="ts5">
+        <span class="tutorial-icon">✅</span>
+        <p class="tutorial-title">Tudo pronto!</p>
+        <p class="tutorial-desc">Agora é só usar! Se precisar rever estas dicas, recarregue a página segurando Shift. Qualquer dúvida, é só perguntar.</p>
+      </div>
+      <div class="tutorial-dots" id="tutorialDots"></div>
+      <button class="tutorial-next" id="tutorialNext">Próximo →</button>
+      <button class="tutorial-skip" id="tutorialSkip">Pular tutorial</button>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    const TUTORIAL_KEY = 'fintracker-tutorial-done';
+    const overlay = document.getElementById('tutorialOverlay');
+    const steps = document.querySelectorAll('.tutorial-step');
+    const dotsContainer = document.getElementById('tutorialDots');
+    const nextBtn = document.getElementById('tutorialNext');
+    const skipBtn = document.getElementById('tutorialSkip');
+    let current = 0;
+
+    // Só mostra se nunca viu antes
+    if (localStorage.getItem(TUTORIAL_KEY)) return;
+
+    // Gera os pontos de progresso
+    steps.forEach((_, i) => {
+      const dot = document.createElement('span');
+      dot.className = 'tutorial-dot' + (i === 0 ? ' active' : '');
+      dotsContainer.appendChild(dot);
+    });
+
+    function goTo(index) {
+      steps[current].classList.remove('active');
+      dotsContainer.children[current].classList.remove('active');
+      current = index;
+      steps[current].classList.add('active');
+      dotsContainer.children[current].classList.add('active');
+      const isLast = current === steps.length - 1;
+      nextBtn.textContent = isLast ? '🎉 Começar a usar!' : 'Próximo →';
+      skipBtn.hidden = isLast;
+    }
+
+    function closeTutorial() {
+      localStorage.setItem(TUTORIAL_KEY, '1');
+      overlay.hidden = true;
+    }
+
+    nextBtn.addEventListener('click', () => {
+      if (current < steps.length - 1) goTo(current + 1);
+      else closeTutorial();
+    });
+
+    skipBtn.addEventListener('click', closeTutorial);
+
+    // Mostra o tutorial assim que o app terminar de carregar
+    window.addEventListener('fintracker-ready', () => { overlay.hidden = false; }, { once: true });
+    // Fallback: abre após 1.5s mesmo sem o evento
+    setTimeout(() => { if (!localStorage.getItem(TUTORIAL_KEY)) overlay.hidden = false; }, 1500);
+  })();
+  </script>
 </body>
 </html>

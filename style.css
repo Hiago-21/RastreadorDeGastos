@@ -7,4 +7,98 @@ html[data-theme=dark]{color-scheme:dark;--bg:#20212b;--surface:#2d4354;--soft:#3
 .quick-stats{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0 0}.stat-card{min-width:0;padding:20px;border-radius:20px;background:var(--surface);box-shadow:var(--shadow);border:1px solid var(--line)}.stat-card span,.stat-card small{display:block;color:var(--muted);font-size:14px;font-weight:600}.stat-card strong{display:block;overflow:hidden;margin:8px 0 6px;font:800 22px Manrope;text-overflow:ellipsis;white-space:nowrap}.charts-section,.history-section{margin-bottom:40px}.section-heading{margin-bottom:20px}.chart-card{min-width:0;padding:24px;border:1px solid var(--line);border-radius:20px;background:var(--surface);box-shadow:var(--shadow)}.charts-grid{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr);gap:16px}.chart-wrap{position:relative;width:190px;height:190px;margin:auto}.chart-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}.chart-center strong{font:800 24px Manrope}.chart-center span,.chart-card-heading{color:var(--muted);font-size:14px;font-weight:600}.legend{display:grid;gap:12px;margin-top:20px}.legend-item{display:grid;grid-template-columns:12px 1fr auto;align-items:center;gap:10px;font-size:14px}.legend-dot{width:12px;height:12px;border-radius:50%;background:var(--dot);box-shadow:0 0 10px var(--dot)}.legend-item span:last-child{color:var(--muted);font-weight:700}.bar-chart-wrap{height:245px;margin-top:20px;overflow-x:auto;overflow-y:hidden;scrollbar-color:var(--accent) var(--soft);scrollbar-width:thin}.bar-chart-wrap canvas{display:block;min-width:850px;height:215px!important}
 .search-pill{display:flex;align-items:center;gap:12px;height:54px;padding:0 18px;margin-bottom:16px;border-radius:16px;background:var(--surface);color:var(--muted);box-shadow:var(--shadow);border:1px solid var(--line)}.search-pill span{font-size:24px;transform:rotate(-20deg)}.search-pill input{width:100%;border:0;outline:0;background:transparent;font-size:16px}.count-badge{min-width:32px;padding:6px 12px;border-radius:20px;background:var(--soft);color:var(--muted);font-size:14px;font-weight:600;text-align:center}.expense-list{display:grid;gap:12px}.expense-item{position:relative;min-height:80px;overflow:hidden;border-radius:20px;background:#374151;touch-action:pan-y}.delete-action{position:absolute;inset:0 0 0 auto;display:grid;width:90px;place-items:center;background:var(--danger);color:#fff;font-size:14px;font-weight:600}.expense-content{position:relative;z-index:1;display:flex;align-items:center;gap:16px;min-height:80px;padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:20px;transition:transform .18s}.expense-icon{display:grid;flex:0 0 48px;width:48px;height:48px;place-items:center;border-radius:14px;background:var(--soft);font-size:22px}.expense-info{min-width:0;flex:1}.expense-info strong,.expense-info small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.expense-info strong{margin-bottom:6px;font-size:16px;font-weight:700}.expense-info small{color:var(--muted);font-size:14px}.expense-amount{font-size:16px;font-weight:800}.empty-state{padding:40px 20px;color:var(--muted);text-align:center}.empty-icon{display:block;margin-bottom:12px;font-size:38px}.empty-state strong{display:block;color:var(--text);font-size:16px;font-weight:700}.empty-state p{margin:8px 0 0;font-size:14px}
 .fab{position:fixed;right:max(24px,calc((100vw - 1180px)/2 + 28px));bottom:max(24px,env(safe-area-inset-bottom));z-index:5;display:flex;align-items:center;gap:8px;height:64px;padding:0 24px;border-radius:32px;background:var(--accent);color:#fff;box-shadow:0 10px 25px rgba(158,103,82,.4);font-size:16px;font-weight:700;transition:.2s}.fab::before{content:"+";font-size:26px;margin-top:-2px}.fab:hover{transform:translateY(-4px);box-shadow:0 14px 30px rgba(158,103,82,.55)}.scrim{position:fixed;inset:0;z-index:9;background:rgba(32,33,43,.7);backdrop-filter:blur(5px)}.bottom-sheet{position:fixed;inset:auto 0 0;z-index:10;max-height:92vh;overflow:auto;padding:16px 24px calc(30px + env(safe-area-inset-bottom));border-radius:32px 32px 0 0;background:var(--bg);box-shadow:0 -15px 40px rgba(0,0,0,.2);animation:sheet-up .3s cubic-bezier(0,1,.5,1)}.sheet-handle{width:48px;height:6px;margin:0 auto 24px;border-radius:10px;background:var(--line)}.sheet-heading{margin-bottom:24px}.sheet-heading h2{font-size:26px}.close-button{font-size:28px;color:var(--muted)}.form-field{display:block;flex:1;margin-bottom:20px}.form-field>span,legend{display:block;margin-bottom:10px;color:var(--text);font-size:15px;font-weight:700}.form-field input,.form-field select{width:100%;height:54px;padding:0 16px;border:1px solid var(--line);border-radius:16px;outline:0;background:var(--surface);font-size:16px}.form-field input:focus,.form-field select:focus{border-color:var(--accent);box-shadow:0 0 0 4px rgba(158,103,82,.2)}.form-row{display:flex;gap:12px}.currency-input{height:54px;padding:0 16px;border:1px solid var(--line);border-radius:16px;background:var(--surface);color:var(--muted);font-size:16px}.currency-input input{height:auto;padding:0;border:0;background:transparent}.advanced-fieldset{padding:20px 0 0;margin:10px 0 0;border:0;border-top:1px solid var(--line)}.type-pills{display:flex;gap:10px}.type-pills label{flex:1}.type-pills input{position:absolute;opacity:0}.type-pills span{display:block;padding:14px 5px;border:2px solid var(--line);border-radius:16px;color:var(--muted);font-size:14px;font-weight:600;text-align:center;transition:.15s}.type-pills input:checked+span{border-color:var(--accent);background:var(--accent);color:#fff}.installment-field{margin-top:20px}.primary-button{display:flex;align-items:center;justify-content:center;gap:12px;width:100%;height:60px;padding:0 24px;margin-top:12px;border-radius:20px;background:var(--accent);color:#fff;font-size:18px;font-weight:800;transition:.2s}.primary-button:hover{background:#7a4e3d}.primary-button span{font-size:24px}.form-feedback{min-height:20px;margin:10px 0 0;color:var(--danger);font-size:14px;font-weight:600}.login-form .form-feedback{color:var(--mint)}
-@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}@keyframes sheet-up{from{transform:translateY(100%)}to{transform:none}}@media(max-width:900px){.dashboard-grid{grid-template-columns:1fr}.dashboard-aside{grid-template-columns:1fr 1fr}}@media(max-width:650px){.app-shell{padding:30px 20px 110px}.dashboard-aside{display:block}.quick-stats{margin-bottom:25px}.charts-grid{grid-template-columns:1fr}.chart-card{margin-bottom:12px}.bottom-sheet{padding-bottom:calc(25px + env(safe-area-inset-bottom))}}@media(min-width:651px){.bottom-sheet{left:50%;right:auto;width:min(100%,560px);transform:translateX(-50%);border-radius:26px 26px 0 0}}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@keyframes sheet-up{from{transform:translateY(100%)}to{transform:none}}
+
+/* ── Tablet ────────────────────────────────────── */
+@media(max-width:900px){
+  .dashboard-grid{grid-template-columns:1fr}
+  .dashboard-aside{grid-template-columns:1fr 1fr}
+}
+
+/* ── Mobile ────────────────────────────────────── */
+@media(max-width:650px){
+  /* Padding com safe-area para notch e home indicator */
+  .app-shell{
+    padding:env(safe-area-inset-top,20px) 16px calc(90px + env(safe-area-inset-bottom,16px));
+  }
+
+  /* Header menor */
+  h1{font-size:26px}
+  h2{font-size:19px}
+  .eyebrow{font-size:11px}
+
+  /* Topbar: compacta */
+  .topbar{margin-bottom:20px;flex-wrap:wrap;gap:10px}
+  .header-actions{gap:8px}
+  .icon-button,.close-button{width:44px;height:44px;font-size:20px}
+  .logout-button{padding:10px 12px;font-size:14px}
+
+  /* Card de saldo */
+  .balance-card{padding:22px 20px}
+  .balance-value{font-size:36px;margin:12px 0 24px}
+
+  /* Stats: 2 colunas apertadas */
+  .quick-stats{grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+  .stat-card{padding:14px 12px}
+  .stat-card strong{font-size:18px}
+
+  /* Layout em coluna única */
+  .dashboard-aside{display:block}
+  .charts-grid{grid-template-columns:1fr}
+  .chart-card{margin-bottom:12px;padding:16px}
+
+  /* Donut menor no mobile */
+  .chart-wrap{width:160px;height:160px}
+  .chart-wrap canvas{width:160px!important;height:160px!important}
+  .chart-center strong{font-size:18px}
+
+  /* Lista de gastos */
+  .expense-info strong{font-size:15px}
+  .expense-amount{font-size:15px}
+  .expense-icon{width:42px;height:42px;font-size:20px}
+
+  /* Sheet (bottom drawer) */
+  .bottom-sheet{
+    padding:16px 18px calc(28px + env(safe-area-inset-bottom,16px));
+    border-radius:24px 24px 0 0
+  }
+  .sheet-heading h2{font-size:22px}
+
+  /* FAB com safe-area */
+  .fab{
+    right:16px;
+    bottom:calc(16px + env(safe-area-inset-bottom,0px));
+    height:56px;
+    padding:0 20px;
+    font-size:15px
+  }
+
+  /* Busca */
+  .search-pill{height:48px}
+}
+
+/* ── Mobile extra pequeno ──────────────────────── */
+@media(max-width:380px){
+  .app-shell{padding-left:12px;padding-right:12px}
+  .balance-value{font-size:30px}
+  .stat-card strong{font-size:16px}
+}
+
+/* ── Desktop: bottom-sheet centralizado ────────── */
+@media(min-width:651px){
+  .bottom-sheet{
+    left:50%;right:auto;
+    width:min(100%,560px);
+    transform:translateX(-50%);
+    border-radius:26px 26px 0 0
+  }
+}
+
+/* ── Quando instalado como PWA (standalone) ────── */
+@media(display-mode:standalone){
+  /* Remove padding do topo se não houver notch */
+  .app-shell{padding-top:max(env(safe-area-inset-top,0px), 20px)}
+  .login-screen{padding-top:max(env(safe-area-inset-top,32px), 32px)}
+}
+
